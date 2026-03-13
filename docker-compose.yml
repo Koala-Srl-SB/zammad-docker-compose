@@ -110,6 +110,9 @@ services:
   zammad-nginx:
     <<: *zammad-service
     command: ["zammad-nginx"]
+    networks:
+      - default
+      - dokploy-network    
     expose:
       - "${NGINX_PORT}"
     ports:
