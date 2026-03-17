@@ -117,8 +117,8 @@ services:
       - "${NGINX_PORT}"
     ports:
       - "${NGINX_EXPOSE_PORT}:${NGINX_PORT}"
-#    volumes:
-#      - ./default:/etc/nginx/sites-available/conf
+    volumes:
+      - ./default:/etc/nginx/sites-available/conf
     depends_on:
       - zammad-railsserver
  
