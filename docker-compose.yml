@@ -152,12 +152,12 @@ services:
  
 volumes:
   elasticsearch-data:
-    driver: local
   postgresql-data:
-    driver: local
   redis-data:
-    driver: local
   zammad-backup:
-    driver: local
   zammad-storage:
-    driver: local
+
+    
+networks:
+  dokploy-network:
+    external: true    
