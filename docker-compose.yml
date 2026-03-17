@@ -117,6 +117,11 @@ services:
       - "${NGINX_PORT}"
     ports:
       - "${NGINX_EXPOSE_PORT}:${NGINX_PORT}"
+    environment:
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+      VIRTUAL_PORT: ${VIRTUAL_PORT}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     depends_on:
       - zammad-railsserver
  
