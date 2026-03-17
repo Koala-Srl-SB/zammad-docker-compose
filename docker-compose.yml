@@ -117,6 +117,14 @@ services:
       - "${NGINX_PORT}"
     ports:
       - "${NGINX_EXPOSE_PORT}:${NGINX_PORT}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zammad.rule=Host(`${ZAMMAD_FQDN}`)"
+      - "traefik.http.routers.zammad.entrypoints=websecure"
+      - "traefik.http.routers.zammad.tls=true"
+      - "traefik.http.routers.zammad.middlewares=zammad-headers@docker"
+      - "traefik.http.middlewares.zammad-headers.headers.customRequestHeaders.X-Forwarded-Proto=https"
+      - "traefik.http.middlewares.zammad-headers.headers.customRequestHeaders.X-Forwarded-Host=${ZAMMAD_FQDN}"
     volumes:
       - ./default:/etc/nginx/sites-available/conf
     depends_on:
