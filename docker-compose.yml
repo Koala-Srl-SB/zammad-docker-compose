@@ -143,6 +143,8 @@ services:
   zammad-railsserver:
     <<: *zammad-service
     command: ["zammad-railsserver"]
+    expose:
+      - "3000"
     volumes:
       - ./session_store_override.rb:/opt/zammad/config/initializers/session_store_override.rb
  
