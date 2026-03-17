@@ -138,7 +138,7 @@ services:
     expose:
       - "3000"
     volumes:
-      - ./prodcution.rb:/opt/zammad/config/environments/production.rb
+   #   - ./prodcution.rb:/opt/zammad/config/environments/production.rb
    #   - ./session_store_override.rb:/opt/zammad/config/initializers/session_store_override.rb
  
   zammad-redis:
