@@ -117,8 +117,8 @@ services:
       - "${NGINX_PORT}"
     ports:
       - "${NGINX_EXPOSE_PORT}:${NGINX_PORT}"
-    volumes:
-      - ./default:/etc/nginx/sites-available/conf
+   # volumes:
+   #   - ./default:/etc/nginx/sites-available/conf
     depends_on:
       - zammad-railsserver
  
@@ -137,8 +137,8 @@ services:
     command: ["zammad-railsserver"]
     expose:
       - "3000"
-  #  volumes:
-  #    - ./session_store_override.rb:/opt/zammad/config/initializers/session_store_override.rb
+    volumes:
+      - ./session_store_override.rb:/opt/zammad/config/initializers/session_store_override.rb
  
   zammad-redis:
     image: redis:${REDIS_VERSION}
