@@ -139,7 +139,9 @@ services:
       - "3000"
     networks:
       - default
-      - dokploy-network    
+      - dokploy-network
+    extra_hosts:
+      - "auth.koala.it:172.17.0.1"   
    # volumes:
    #   - ./prodcution.rb:/opt/zammad/config/environments/production.rb
    #   - ./session_store_override.rb:/opt/zammad/config/initializers/session_store_override.rb
