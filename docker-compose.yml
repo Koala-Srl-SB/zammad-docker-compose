@@ -9,9 +9,10 @@ x-shared:
       POSTGRESQL_PORT: ${POSTGRES_PORT}
       POSTGRESQL_OPTIONS: ${POSTGRESQL_OPTIONS}
       POSTGRESQL_DB_CREATE:
- 
+
       # Redis standalone
       REDIS_URL: ${REDIS_URL}
+
       # Redis sentinel
       REDIS_SENTINELS: ${REDIS_SENTINELS}
       REDIS_SENTINEL_NAME: ${REDIS_SENTINEL_NAME}
@@ -19,14 +20,15 @@ x-shared:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_SENTINEL_USERNAME: ${REDIS_SENTINEL_USERNAME}
       REDIS_SENTINEL_PASSWORD: ${REDIS_SENTINEL_PASSWORD}
- 
+
       S3_URL: ${S3_URL}
+
       # Backup settings
       BACKUP_DIR: ${BACKUP_DIR}
       BACKUP_TIME: ${BACKUP_TIME}
       HOLD_DAYS: ${HOLD_DAYS}
       TZ: ${TZ}
-      # Allow passing in these variables via .env:
+
       AUTOWIZARD_JSON: ${AUTOWIZARD_JSON}
       AUTOWIZARD_RELATIVE_PATH: ${AUTOWIZARD_RELATIVE_PATH}
       ELASTICSEARCH_ENABLED: ${ELASTICSEARCH_ENABLED}
@@ -37,11 +39,14 @@ x-shared:
       ELASTICSEARCH_PASS: ${ELASTICSEARCH_PASS}
       ELASTICSEARCH_NAMESPACE: ${ELASTICSEARCH_NAMESPACE}
       ELASTICSEARCH_REINDEX: ${ELASTICSEARCH_REINDEX}
+
       NGINX_PORT: ${NGINX_PORT}
       NGINX_CLIENT_MAX_BODY_SIZE: ${NGINX_CLIENT_MAX_BODY_SIZE}
       NGINX_SERVER_NAME: ${NGINX_SERVER_NAME}
       NGINX_SERVER_SCHEME: ${NGINX_SERVER_SCHEME}
+
       RAILS_TRUSTED_PROXIES: ${RAILS_TRUSTED_PROXIES}
+
       ZAMMAD_HTTP_TYPE: ${ZAMMAD_HTTP_TYPE}
       ZAMMAD_FQDN: ${ZAMMAD_FQDN}
       ZAMMAD_WEB_CONCURRENCY: ${ZAMMAD_WEB_CONCURRENCY}
@@ -54,75 +59,73 @@ x-shared:
       ZAMMAD_PROCESS_DELAYED_AI_JOBS_WORKER_THREADS: ${ZAMMAD_PROCESS_DELAYED_AI_JOBS_WORKER_THREADS}
       ZAMMAD_PROCESS_DELAYED_COMMUNICATION_INBOUND_JOBS_WORKERS: ${ZAMMAD_PROCESS_DELAYED_COMMUNICATION_INBOUND_JOBS_WORKERS}
       ZAMMAD_PROCESS_DELAYED_COMMUNICATION_INBOUND_JOBS_WORKER_THREADS: ${ZAMMAD_PROCESS_DELAYED_COMMUNICATION_INBOUND_JOBS_WORKER_THREADS}
-      # ZAMMAD_SESSION_JOBS_CONCURRENT is deprecated, please use ZAMMAD_PROCESS_SESSIONS_JOBS_WORKERS instead.
+
       ZAMMAD_SESSION_JOBS_CONCURRENT: ${ZAMMAD_SESSION_JOBS_CONCURRENT}
-      # Variables used by nginx-proxy container for reverse proxy creations
-      # for docs refer to https://github.com/nginx-proxy/nginx-proxy
+
       VIRTUAL_HOST: ${VIRTUAL_HOST}
       VIRTUAL_PORT: ${VIRTUAL_PORT}
-      # Variables used by acme-companion for retrieval of LetsEncrypt certificate
-      # for docs refer to https://github.com/nginx-proxy/acme-companion
       LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
- 
+
     image: ${IMAGE_REPO}:${VERSION}
     restart: ${RESTART}
+
     volumes:
-      - zammad-backup:/var/tmp/zammad:ro
-      - zammad-storage:/opt/zammad/storage
+      - zammad-backup-dev:/var/tmp/zammad:ro
+      - zammad-storage-dev:/opt/zammad/storage
+
     depends_on:
-      - zammad-memcached
-      - zammad-postgresql
-      - zammad-redis
- 
+      - zammad-memcached-dev
+      - zammad-postgresql-dev
+      - zammad-redis-dev
+
+
 services:
-  zammad-backup:
+  zammad-backup-dev:
     <<: *zammad-service
     command: ["zammad-backup"]
     volumes:
-      - zammad-backup:/var/tmp/zammad
-      - zammad-storage:/opt/zammad/storage
+      - zammad-backup-dev:/var/tmp/zammad
+      - zammad-storage-dev:/opt/zammad/storage
     user: 0:0
- 
-  zammad-elasticsearch:
+
+  zammad-elasticsearch-dev:
     image: elasticsearch:${ELASTICSEARCH_VERSION}
     restart: ${RESTART}
     volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
+      - elasticsearch-data-dev:/usr/share/elasticsearch/data
     environment:
       discovery.type: single-node
-      xpack.security.enabled: 'false'
+      xpack.security.enabled: "false"
       ES_JAVA_OPTS: ${ELASTICSEARCH_JAVA_OPTS}
- 
-  zammad-init:
+
+  zammad-init-dev:
     <<: *zammad-service
     command: ["zammad-init"]
     depends_on:
-      - zammad-postgresql
+      - zammad-postgresql-dev
     restart: on-failure
     user: 0:0
- 
-  zammad-memcached:
+
+  zammad-memcached-dev:
     command: memcached -m 256M
     image: memcached:${MEMCACHE_VERSION}
     restart: ${RESTART}
- 
-  zammad-nginx:
+
+  zammad-nginx-dev:
     <<: *zammad-service
     command: ["zammad-nginx"]
     networks:
       - default
-      - dokploy-network    
+      - dokploy-network
     expose:
       - "${NGINX_PORT}"
     ports:
       - "${NGINX_EXPOSE_PORT}:${NGINX_PORT}"
-   # volumes:
-   #   - ./default:/etc/nginx/sites-available/conf
     depends_on:
-      - zammad-railsserver
- 
-  zammad-postgresql:
+      - zammad-railsserver-dev
+
+  zammad-postgresql-dev:
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -130,9 +133,9 @@ services:
     image: postgres:${POSTGRES_VERSION}
     restart: ${RESTART}
     volumes:
-      - postgresql-data:/var/lib/postgresql/data
- 
-  zammad-railsserver:
+      - postgresql-data-dev:/var/lib/postgresql/data
+
+  zammad-railsserver-dev:
     <<: *zammad-service
     command: ["zammad-railsserver"]
     expose:
@@ -141,33 +144,31 @@ services:
       - default
       - dokploy-network
     extra_hosts:
-      - "auth.koala.it:172.17.0.1"   
-   # volumes:
-   #   - ./prodcution.rb:/opt/zammad/config/environments/production.rb
-   #   - ./session_store_override.rb:/opt/zammad/config/initializers/session_store_override.rb
- 
-  zammad-redis:
+      - "auth.dev.koala.it:172.17.0.1"
+
+  zammad-redis-dev:
     image: redis:${REDIS_VERSION}
     restart: ${RESTART}
     volumes:
-      - redis-data:/data
- 
-  zammad-scheduler:
+      - redis-data-dev:/data
+
+  zammad-scheduler-dev:
     <<: *zammad-service
     command: ["zammad-scheduler"]
- 
-  zammad-websocket:
+
+  zammad-websocket-dev:
     <<: *zammad-service
     command: ["zammad-websocket"]
- 
-volumes:
-  elasticsearch-data:
-  postgresql-data:
-  redis-data:
-  zammad-backup:
-  zammad-storage:
 
-    
+
+volumes:
+  elasticsearch-data-dev:
+  postgresql-data-dev:
+  redis-data-dev:
+  zammad-backup-dev:
+  zammad-storage-dev:
+
+
 networks:
   dokploy-network:
-    external: true    
+    external: true
